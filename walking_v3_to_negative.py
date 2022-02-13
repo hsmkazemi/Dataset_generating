@@ -244,40 +244,10 @@ def record(frame_num):
     bpy.ops.anim.keyframe_insert_menu(type='BUILTIN_KSI_LocRot')
     bpy.ops.pose.select_all(action='INVERT')
 
-def location(part):
-    '''
-    if part == 'neck' or part == 'main_spine':
-        imu_sensor_location = part.bone.tail
-    elif part == 'forearm_L' or part == 'forearm_R' or part == 'shin_L' or part == 'shin_R' :
-        imu_sensor_location = (0.1*(part.bone.tail)) + (0.9*(part.bone.head))
-    elif part == 'upper_arm_L' or part == 'upper_arm_R' or part == 'thigh_L' or part == 'thigh_R':
-        imu_sensor_location = (0.1*(part.bone.head)) + (0.9*(part.bone.tail))
-    '''
-    sensor_location = ' '.join([str(elem) for elem in np.array(part.bone.head)]) + "\n"
-    print("sensor_location =", sensor_location)
-    w_on_file = open(coord_file_path, "a+")
-    w_on_file.write(sensor_location)
-    w_on_file.close()
-    
 
 
 
 
-frame = 0
-fc = 5 # frame constant respectively sampling rate 30 Hz means every 1/30 sec a new sample
-rfap = 0  # right forearm position
-lfap = 0  # left forearm position
-rtp = 0  # right foot position
-ltp = 0  # left foot position
-stp = 0  # steps length
-rkp = 0  # right knee position
-lkp = 0  # left knee position
-lsp = 0 # left shin position
-rsp = 0 # right shin position
-msp = 0 # main spine position
-msz = 0 # deviation of main spine from Z axis
-ruap = 0 # right upper arm position
-luap = 0 # left upper arm position
 
 
 
@@ -450,13 +420,29 @@ TR_90 means turn right on its current position by 90 degrees and don't go any st
 
 class Person:
     imu_data = (head, neck, main_spine, upper_arm_L, forearm_L, upper_arm_R, forearm_R, thigh_L, shin_L, thigh_R, shin_R, foot_R, foot_L, hand_R, hand_L)
-    def __init__(self, factor, shin_m_radians, thigh_m_radians):
+    frame = 0
+    rfap = 0  # right forearm position
+    lfap = 0  # left forearm position
+    rtp = 0  # right foot position
+    ltp = 0  # left foot position
+    stp = 0  # steps length
+    rkp = 0  # right knee position
+    lkp = 0  # left knee position
+    lsp = 0  # left shin position
+    rsp = 0  # right shin position
+    msp = 0  # main spine position
+    msz = 0  # deviation of main spine from Z axis
+    ruap = 0  # right upper arm position
+    luap = 0  # left upper arm position
+
+    def __init__(self, factor, shin_m_radians, thigh_m_radians, frame_constant):
         self.factor = factor
         self.shin_m_radians = shin_m_radians
         self.thigh_m_radians = thigh_m_radians
+        self.fc = frame_constant  # frame constant respectively sampling rate 30 Hz means every 1/30 sec a new sample
 
     def save_coords(self,imu_data, frame):
-        resulting_list = []
+        self.resulting_list = []
         for bone in imu_data:
             result = np.array(bone.matrix)[:3, :4]
             location = result[:, -1]
