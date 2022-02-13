@@ -62,8 +62,8 @@ thigh_L.constraints["Limit Rotation"].min_x = math.radians(-130)
 thigh_L.constraints["Limit Rotation"].max_x = math.radians(80)
 thigh_L.constraints["Limit Rotation"].use_limit_y = True
 thigh_L.constraints["Limit Rotation"].max_y = 0
-thigh_L.constraints["Limit Rotation"].use_limit_z = True
-thigh_L.constraints["Limit Rotation"].max_z = 0
+#thigh_L.constraints["Limit Rotation"].use_limit_z = True
+#thigh_L.constraints["Limit Rotation"].max_z = 0
 thigh_L.bone.select = False
 
 #set constraints for right thigh
@@ -77,8 +77,8 @@ thigh_R.constraints["Limit Rotation"].min_x = math.radians(-130)
 thigh_R.constraints["Limit Rotation"].max_x = math.radians(80)
 thigh_R.constraints["Limit Rotation"].use_limit_y = True
 thigh_R.constraints["Limit Rotation"].max_y = 0
-thigh_R.constraints["Limit Rotation"].use_limit_z = True
-thigh_R.constraints["Limit Rotation"].max_z = 0
+#thigh_R.constraints["Limit Rotation"].use_limit_z = True
+#thigh_R.constraints["Limit Rotation"].max_z = 0
 thigh_R.bone.select = False
 
 #set constraints for left shin
@@ -105,8 +105,8 @@ shin_L.constraints["Limit Rotation"].min_x = math.radians(-130)
 shin_L.constraints["Limit Rotation"].max_x = math.radians(80)
 shin_L.constraints["Limit Rotation"].use_limit_y = True
 shin_L.constraints["Limit Rotation"].max_y = 0.174533
-shin_L.constraints["Limit Rotation"].use_limit_z = True
-shin_L.constraints["Limit Rotation"].max_z = 0
+#shin_L.constraints["Limit Rotation"].use_limit_z = True
+#shin_L.constraints["Limit Rotation"].max_z = 0
 shin_L.bone.select = False
 
 #set constraints for right shin
@@ -132,8 +132,8 @@ shin_R.constraints["Limit Rotation"].min_x = math.radians(-130)
 shin_R.constraints["Limit Rotation"].max_x = math.radians(80)
 shin_R.constraints["Limit Rotation"].use_limit_y = True
 shin_R.constraints["Limit Rotation"].max_y = 0.174533
-shin_R.constraints["Limit Rotation"].use_limit_z = True
-shin_R.constraints["Limit Rotation"].max_z = 0
+#shin_R.constraints["Limit Rotation"].use_limit_z = True
+#shin_R.constraints["Limit Rotation"].max_z = 0
 shin_R.bone.select = False
 
 #set constraints for left foot
@@ -148,8 +148,8 @@ foot_L.constraints["Limit Rotation"].min_x = math.radians(-30)
 foot_L.constraints["Limit Rotation"].max_x = math.radians(60)
 foot_L.constraints["Limit Rotation"].use_limit_y = True
 foot_L.constraints["Limit Rotation"].max_y = 0
-foot_L.constraints["Limit Rotation"].use_limit_z = True
-foot_L.constraints["Limit Rotation"].max_z = 0
+#foot_L.constraints["Limit Rotation"].use_limit_z = True
+#foot_L.constraints["Limit Rotation"].max_z = 0
 foot_L.bone.select = False
 
 #set constraints for right foot
@@ -164,8 +164,8 @@ foot_R.constraints["Limit Rotation"].min_x = math.radians(-30)
 foot_R.constraints["Limit Rotation"].max_x = math.radians(60)
 foot_R.constraints["Limit Rotation"].use_limit_y = True
 foot_R.constraints["Limit Rotation"].max_y = 0
-foot_R.constraints["Limit Rotation"].use_limit_z = True
-foot_R.constraints["Limit Rotation"].max_z = 0
+#foot_R.constraints["Limit Rotation"].use_limit_z = True
+#foot_R.constraints["Limit Rotation"].max_z = 0
 foot_R.bone.select = False
 
 #set constraints for left toe
@@ -179,8 +179,8 @@ toe_L.constraints["Limit Rotation"].min_x = math.radians(0)
 toe_L.constraints["Limit Rotation"].max_x = math.radians(30)
 toe_L.constraints["Limit Rotation"].use_limit_y = True
 toe_L.constraints["Limit Rotation"].max_y = 0
-toe_L.constraints["Limit Rotation"].use_limit_z = True
-toe_L.constraints["Limit Rotation"].max_z = 0
+#toe_L.constraints["Limit Rotation"].use_limit_z = True
+#toe_L.constraints["Limit Rotation"].max_z = 0
 
 bpy.ops.pose.constraint_add(type='LIMIT_LOCATION')
 bpy.context.object.pose.bones["toe.L"].constraints["Limit Location"].owner_space = 'WORLD'
@@ -199,8 +199,8 @@ toe_R.constraints["Limit Rotation"].min_x = math.radians(0)
 toe_R.constraints["Limit Rotation"].max_x = math.radians(30)
 toe_R.constraints["Limit Rotation"].use_limit_y = True
 toe_R.constraints["Limit Rotation"].max_y = 0
-toe_R.constraints["Limit Rotation"].use_limit_z = True
-toe_R.constraints["Limit Rotation"].max_z = 0
+#toe_R.constraints["Limit Rotation"].use_limit_z = True
+#toe_R.constraints["Limit Rotation"].max_z = 0
 
 bpy.ops.pose.constraint_add(type='LIMIT_LOCATION')
 bpy.context.object.pose.bones["toe.R"].constraints["Limit Location"].owner_space = 'WORLD'
@@ -232,6 +232,8 @@ heel_R.bone.select = False
 
 #main_spine.bone.select = True
 #bpy.ops.transform.rotate(value = math.radians(-7), orient_axis = 'X')
+
+imu_data = (head, neck, main_spine, upper_arm_L, forearm_L, upper_arm_R, forearm_R, thigh_L, shin_L, thigh_R, shin_R, foot_R, foot_L, hand_R, hand_L)
 
 coord_file_path = "D:\\Codes\\Blender\\final_files\\coordinates.txt"
 if os.path.isfile(coord_file_path):
@@ -419,7 +421,7 @@ TR_90 means turn right on its current position by 90 degrees and don't go any st
 """
 
 class Person:
-    imu_data = (head, neck, main_spine, upper_arm_L, forearm_L, upper_arm_R, forearm_R, thigh_L, shin_L, thigh_R, shin_R, foot_R, foot_L, hand_R, hand_L)
+
     frame = 0
     rfap = 0  # right forearm position
     lfap = 0  # left forearm position
@@ -716,7 +718,10 @@ class Person:
             record(frame)
 
     def turn_right(self, radius, steps=0):
-        pass
+        self.turn = radius
+        bpy.ops.pose.select_all(action='TOGGLE')
+        bpy.ops.transform.rotate(value=(math.radians(turn)), orient_axis='Z')
+        bpy.ops.pose.select_all(action='INVERT')
 
     def turn_left(self, radius, steps=0):
         pass
