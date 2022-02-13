@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import cv2
 import time
 data = np.loadtxt("D:\\Codes\\Blender\\final_files\\acc.txt")
-frame = np.loadtxt("D:\\Codes\\Blender\\final_files\\coordinates.txt")
+frame = np.loadtxt("home//hesam//codes//coordinates.txt")
 
 
 head_acc = data[ : , :3]
