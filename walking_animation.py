@@ -341,7 +341,7 @@ def thigh_m_random():
     elif person == 2:
         return np.random.normal(7.5*factor,0.1)
 
-def wal
+
 shin_m = 20*factor # 50
 thigh_m = 10*factor # 10
 spine_m = 5.0*factor # 1
