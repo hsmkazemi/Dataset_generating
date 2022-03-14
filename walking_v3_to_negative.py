@@ -3,6 +3,7 @@ import numpy as np
 import bpy
 import math
 from mathutils import Matrix
+import random
 
 #from tqdm import tqdm
 
@@ -186,6 +187,7 @@ bpy.ops.pose.constraint_add(type='LIMIT_LOCATION')
 bpy.context.object.pose.bones["toe.L"].constraints["Limit Location"].owner_space = 'WORLD'
 toe_L.constraints["Limit Location"].use_min_z = True
 bpy.context.object.pose.bones["toe.L"].constraints["Limit Location"].use_transform_limit = True
+toe_L.constraints["Limit Location"].min_z = 0
 toe_L.bone.select = False
 
 #set constraints for right toe
@@ -206,7 +208,7 @@ bpy.ops.pose.constraint_add(type='LIMIT_LOCATION')
 bpy.context.object.pose.bones["toe.R"].constraints["Limit Location"].owner_space = 'WORLD'
 toe_R.constraints["Limit Location"].use_min_z = True
 bpy.context.object.pose.bones["toe.R"].constraints["Limit Location"].use_transform_limit = True
-#heel_L.constraints["Limit Location"].min_z = 0
+toe_R.constraints["Limit Location"].min_z = 0
 
 toe_R.bone.select = False
 
@@ -294,10 +296,10 @@ class Person:
 
     def __init__(self, factor, frame_constant):
         self.factor = factor
-        self.shin_m = factor * 20
+        self.shin_m = factor * 50
         self.thigh_m = factor * 10
         self.hand_m = 7
-        self.spine_m = factor * 5
+        self.spine_m = factor * 2
         self.fc = frame_constant  # frame constant respectively sampling rate 30 Hz means every 1/30 sec a new sample
         #record(1)
 
@@ -309,6 +311,7 @@ class Person:
         bpy.ops.pose.select_all(action='SELECT')
         bpy.context.scene.frame_set(frame_num)
         bpy.ops.anim.keyframe_insert_menu(type='BUILTIN_KSI_LocRot')
+
         bpy.ops.pose.select_all(action='INVERT')
 
     def save_coords(self,imu_data, frame):
@@ -396,6 +399,8 @@ class Person:
         self.final_result = np.array(self.final_result)
         np.savetxt(coord_file_path, self.final_result, "%.10g")
 
+        self.final_result = []
+
 
 
     def walk_straight(self, radius, steps=0):
@@ -422,7 +427,7 @@ class Person:
             bpy.ops.transform.rotate(value=(math.radians(self.hand_m)), orient_axis='X')
             upper_arm_L.bone.select = False
 
-            self.frame = self.frame + self.fc  # frame = 30
+            self.frame = self.frame + random.randint(3,5) # self.fc  # frame = 30
             self.record(self.frame)
             self.final_result.append(self.save_coords(self.imu_data, self.frame))
 
@@ -451,7 +456,7 @@ class Person:
             bpy.ops.transform.rotate(value=(math.radians(self.hand_m)), orient_axis='X')
             upper_arm_L.bone.select = False
 
-            self.frame = self.frame + self.fc  # frame = 35
+            self.frame = self.frame + random.randint(3,5) # self.fc  # frame = 35
             self.record(self.frame)
             self.final_result.append(self.save_coords(self.imu_data, self.frame))
 
@@ -475,7 +480,7 @@ class Person:
             bpy.ops.transform.rotate(value=(math.radians(-self.hand_m)), orient_axis='X')
             forearm_R.bone.select = False
 
-            self.frame = self.frame + self.fc  # frame = 40
+            self.frame = self.frame + random.randint(3,5) # self.fc  # frame = 40
             self.record(self.frame)
             ###final_result.append(save_coords(imu_data, frame))
 
@@ -516,7 +521,7 @@ class Person:
 
             # relying on the right leg
 
-            self.frame = self.frame + self.fc  # frame = 45
+            self.frame = self.frame + random.randint(3,5) # self.fc  # frame = 45
             self.record(self.frame)
             ###final_result.append(save_coords(imu_data, frame))
 
@@ -550,7 +555,7 @@ class Person:
             bpy.ops.transform.rotate(value=(math.radians(self.hand_m)), orient_axis='X')
             upper_arm_R.bone.select = False
 
-            self.frame = self.frame + self.fc  # frame = 50
+            self.frame = self.frame + random.randint(3,5) # self.fc  # frame = 50
             self.record(self.frame)
             self.final_result.append(self.save_coords(self.imu_data, self.frame))
 
@@ -584,7 +589,7 @@ class Person:
             bpy.ops.transform.rotate(value=(math.radians(self.hand_m)), orient_axis='X')
             upper_arm_R.bone.select = False
 
-            self.frame = self.frame + self.fc  # frame = 55
+            self.frame = self.frame + random.randint(3,5) # self.fc  # frame = 55
             self.record(self.frame)
             self.final_result.append(self.save_coords(self.imu_data, self.frame))
 
@@ -613,7 +618,7 @@ class Person:
             # bpy.ops.transform.rotate(value=(math.radians(-hand_m)), orient_axis='X')
             # upper_arm_R.bone.select = False
 
-            self.frame = self.frame + self.fc  # frame = 60
+            self.frame = self.frame + random.randint(3,5) # self.fc  # frame = 60
             self.record(self.frame)
             self.final_result.append(self.save_coords(self.imu_data, self.frame))
 
@@ -647,11 +652,18 @@ class Person:
             bpy.ops.transform.rotate(value=(math.radians(self.hand_m)), orient_axis='X')
             forearm_R.bone.select = False
 
-            self.frame = self.frame + self.fc  # frame = 65
+            self.frame = self.frame + random.randint(3,5) # self.fc  # frame = 65
             self.record(self.frame)
+
+
+
+
+
 
         self.final_result = np.array(self.final_result)
         np.savetxt(coord_file_path, self.final_result, "%.10g")
+
+        self.final_result = []
 
     def stop_walking(self):
         thigh_L.bone.select = True
@@ -751,5 +763,7 @@ make_animation(person_dict_1)
 waling_animation(person_dict_1)
 
 new = Person(0.66, 5)
+
+new.start_walking()
 
 new.walk_straight(0, 15)
