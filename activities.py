@@ -731,19 +731,19 @@ class Person:
                 bpy.ops.transform.rotate(value=(math.radians(15)), orient_axis='X')
                 foot_R.bone.select = False
 
-                match(l):
-                    case 0:
-                        main_spine.bone.select = True
-                        bpy.ops.transform.translate(value = (0.0, 0.0, (math.radians(-6))))
-                        main_spine.bone.select = False
-                    case 1:
-                        main_spine.bone.select = True
-                        bpy.ops.transform.translate(value=(0.0, 0.0, (math.radians(-18))))
-                        main_spine.bone.select = False
-                    case 2:
-                        main_spine.bone.select = True
-                        bpy.ops.transform.translate(value=(0.0, 0.0, (math.radians(-20.5))))
-                        main_spine.bone.select = False
+
+                if l == 0:
+                    main_spine.bone.select = True
+                    bpy.ops.transform.translate(value = (0.0, 0.0, (math.radians(-6))))
+                    main_spine.bone.select = False
+                elif l == 1:
+                    main_spine.bone.select = True
+                    bpy.ops.transform.translate(value=(0.0, 0.0, (math.radians(-18))))
+                    main_spine.bone.select = False
+                elif l == 2:
+                    main_spine.bone.select = True
+                    bpy.ops.transform.translate(value=(0.0, 0.0, (math.radians(-20.5))))
+                    main_spine.bone.select = False
 
                 self.frame = self.frame + random.uniform(3,5)
                 self.record(self.frame)
@@ -1308,19 +1308,19 @@ class Person:
                 bpy.ops.transform.rotate(value=(math.radians(-15)), orient_axis='X')
                 foot_R.bone.select = False
 
-                match(sixth):
-                    case 0:
-                        main_spine.bone.select = True
-                        bpy.ops.transform.translate(value=(0.0,(math.radians(3.25)), (math.radians(20.5))))
-                        main_spine.bone.select = False
-                    case 1:
-                        main_spine.bone.select = True
-                        bpy.ops.transform.translate(value=(0.0,(math.radians(-4.25)), (math.radians(18))))
-                        main_spine.bone.select = False
-                    case 2:
-                        main_spine.bone.select = True
-                        bpy.ops.transform.translate(value = (0.0,(math.radians(-2.75)), (math.radians(9))))
-                        main_spine.bone.select = False
+
+                if sixth == 0:
+                    main_spine.bone.select = True
+                    bpy.ops.transform.translate(value=(0.0,(math.radians(3.25)), (math.radians(20.5))))
+                    main_spine.bone.select = False
+                elif sixth == 1:
+                    main_spine.bone.select = True
+                    bpy.ops.transform.translate(value=(0.0,(math.radians(-4.25)), (math.radians(18))))
+                    main_spine.bone.select = False
+                elif sixth == 2:
+                    main_spine.bone.select = True
+                    bpy.ops.transform.translate(value = (0.0,(math.radians(-2.75)), (math.radians(9))))
+                    main_spine.bone.select = False
 
 
 
@@ -1379,19 +1379,18 @@ class Person:
                 bpy.ops.transform.rotate(value=(math.radians(-15)), orient_axis='X')
                 foot_R.bone.select = False
 
-                match(stand):
-                    case 0:
-                        main_spine.bone.select = True
-                        bpy.ops.transform.translate(value=(0.0,(math.radians(3.25)), (math.radians(18.5))))
-                        main_spine.bone.select = False
-                    case 1:
-                        main_spine.bone.select = True
-                        bpy.ops.transform.translate(value=(0.0,(math.radians(-4.25)), (math.radians(18))))
-                        main_spine.bone.select = False
-                    case 2:
-                        main_spine.bone.select = True
-                        bpy.ops.transform.translate(value = (0.0,(math.radians(-2.75)), (math.radians(9))))
-                        main_spine.bone.select = False
+                if stand == 0:
+                    main_spine.bone.select = True
+                    bpy.ops.transform.translate(value=(0.0,(math.radians(3.25)), (math.radians(18.5))))
+                    main_spine.bone.select = False
+                elif stand == 1:
+                    main_spine.bone.select = True
+                    bpy.ops.transform.translate(value=(0.0,(math.radians(-4.25)), (math.radians(18))))
+                    main_spine.bone.select = False
+                elif stand == 2:
+                    main_spine.bone.select = True
+                    bpy.ops.transform.translate(value = (0.0,(math.radians(-2.75)), (math.radians(9))))
+                    main_spine.bone.select = False
 
                 self.frame = self.frame + random.uniform(3, 5)
                 self.record(self.frame)
@@ -1454,19 +1453,19 @@ class Person:
                 # bpy.ops.transform.rotate(value=(math.radians(13)), orient_axis='X')
                 # main_spine.bone.select = False
 
-                match(l):
-                    case 0:
-                        main_spine.bone.select = True
-                        bpy.ops.transform.translate(value = (0.0, (math.radians(12)), (math.radians(-6))))
-                        main_spine.bone.select = False
-                    case 1:
-                        main_spine.bone.select = True
-                        bpy.ops.transform.translate(value=(0.0, (math.radians(10)), (math.radians(-8))))
-                        main_spine.bone.select = False
-                    case 2:
-                        main_spine.bone.select = True
-                        bpy.ops.transform.translate(value=(0.0, (math.radians(5)), (math.radians(-13))))
-                        main_spine.bone.select = False
+
+                if l == 0:
+                    main_spine.bone.select = True
+                    bpy.ops.transform.translate(value = (0.0, (math.radians(12)), (math.radians(-6))))
+                    main_spine.bone.select = False
+                elif l == 1:
+                    main_spine.bone.select = True
+                    bpy.ops.transform.translate(value=(0.0, (math.radians(10)), (math.radians(-8))))
+                    main_spine.bone.select = False
+                elif l == 2:
+                    main_spine.bone.select = True
+                    bpy.ops.transform.translate(value=(0.0, (math.radians(5)), (math.radians(-13))))
+                    main_spine.bone.select = False
 
                 self.frame = self.frame + random.uniform(3,5)
                 self.record(self.frame)
