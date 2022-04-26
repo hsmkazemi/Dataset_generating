@@ -85,6 +85,8 @@ thigh_R.constraints["Limit Rotation"].use_limit_z = True
 thigh_R.constraints["Limit Rotation"].max_z = 0
 thigh_R.bone.select = False
 
+
+
 #set constraints for left shin
 shin_L.bone.select = True
 bpy.data.objects["metarig"].data.bones.active = shin_L.bone
@@ -277,7 +279,7 @@ class Person:
         self.hand_m = 7
         self.spine_m = factor * 2
         self.fc = frame_constant  # frame constant respectively sampling rate 30 Hz means every 1/30 sec a new sample
-        self.position = 0
+        self.position = "Standing"
         #record(1)
 
     def thigh_m_random(self):
@@ -313,11 +315,25 @@ class Person:
 
     def wait(self,time):
         for line in range(0,time):
-            self.frame = self.frame + random.uniform(2,3)  # frame = 10
-            self.record(self.frame)
+            if self.position == "Sitting_in_front_of_a_table" and time >= 3:
+                self._looking_around()
+                self.frame = self.frame + random.uniform(6,5)  # frame = 10
+                self.record(self.frame)
+            elif self.position == "Standing" and time >= 3:
+                #self._crossing_arms()
+                self.frame = self.frame + random.uniform(2,3)  # frame = 10
+                self.record(self.frame)
+            elif self.position == "Lying_down" and time >= 3:
+                self._crossing_legs()
+                self.frame = self.frame + random.uniform(2,3)  # frame = 10
+                self.record(self.frame)
+            else:
+                self.frame = self.frame + random.uniform(2,3)  # frame = 10
+                self.record(self.frame)
+
 
     def start_walking(self): # position 0->1
-        if self.position == 0:
+        if self.position == "Standing":
 
             thigh_L.bone.select = True
             self.ltp = (math.radians(self.thigh_m_random())) + self.ltp
@@ -386,12 +402,12 @@ class Person:
 
             self.final_result = []
 
-            self.position = 1
+            self.position = "Start_walking"
         else:
             print(self.position)
 
     def walk_straight(self, radius, steps=0): # position 1->2
-        if self.position == 1:
+        if self.position == "Start_walking" :
            for iteration in range(0, steps):
 
             shin_R.bone.select = True
@@ -651,13 +667,13 @@ class Person:
             np.savetxt(coord_file_path, self.final_result, "%.10g")
 
             self.final_result = []
-            self.position = 2
+            self.position = "Walking_straight"
         else:
             print(self.position)
 
     def stop_walking(self): # position 2->0
 
-        if self.position == 2:
+        if self.position == "Walking_straight":
 
             bpy.ops.pose.select_all(action='SELECT')
             bpy.ops.pose.rot_clear()
@@ -698,13 +714,13 @@ class Person:
 
             self.final_result = []
 
-            self.position = 0
+            self.position = "Standing"
 
         else:
             print(self.position)
 
     def sitting_half_raised(self): # position 0->3
-        if self.position == 0:
+        if self.position == "Standing":
             for l in range(0,3):
                 thigh_L.bone.select = True
                 bpy.ops.transform.rotate(value=(math.radians(26)), orient_axis = 'X')
@@ -753,14 +769,12 @@ class Person:
             self.final_result = np.array(self.final_result)
             np.savetxt(coord_file_path, self.final_result, "%.10g")
             self.final_result = []
-            self.position = 3
+            self.position = "Sitting_half_raised"
         else:
             print(self.position)
 
     def lying_down(self): # position 3->4
-        if self.position == 3:
-
-        #self.sitting()
+        if self.position == "Sitting_half_raised":
 
             for s in range(0,3):
                 mid_spine.bone.select = True
@@ -1003,13 +1017,13 @@ class Person:
             self.final_result = np.array(self.final_result)
             np.savetxt(coord_file_path, self.final_result, "%.10g")
             self.final_result =[]
-            self.position = 4
+            self.position = "Lying_down"
 
         else:
             print(self.position)
 
-    def standing_from_lying(self): # position 4->5
-        if self.position ==4:
+    def standing_from_lying(self): # position 4->0
+        if self.position == "Lying_down":
 
             bpy.context.object.pose.use_mirror_x = True
             upper_arm_L.bone.select = True
@@ -1346,12 +1360,12 @@ class Person:
             self.final_result = np.array(self.final_result)
             np.savetxt(coord_file_path, self.final_result, "%.10g")
             self.final_result = []
-            self.position = 0
+            self.position = "Standing"
         else:
             print(self.position)
 
     def standing_from_half_raised(self):
-        if self.position == 3:
+        if self.position == "Sitting_half_raised":
 
             for stand in range(0,3):
                 thigh_L.bone.select = True
@@ -1414,7 +1428,7 @@ class Person:
             np.savetxt(coord_file_path, self.final_result, "%.10g")
             self.final_result = []
 
-            self.position = 0
+            self.position = "Standing"
 
         else:
             print(self.position)
@@ -1422,7 +1436,7 @@ class Person:
 
 
     def sitting_in_fron_of_a_table(self):
-        if self.position == 0:
+        if self.position == "Standing":
             for l in range(0,3):
                 thigh_L.bone.select = True
                 bpy.ops.transform.rotate(value=(math.radians(26)), orient_axis = 'X')
@@ -1449,9 +1463,23 @@ class Person:
                 bpy.ops.transform.rotate(value=(math.radians(1)), orient_axis='X')
                 foot_R.bone.select = False
 
-                # main_spine.bone.select = True
-                # bpy.ops.transform.rotate(value=(math.radians(13)), orient_axis='X')
-                # main_spine.bone.select = False
+                mid_spine.bone.select = True
+                bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(-3.5, -4.1))), orient_axis='X')
+                mid_spine.bone.select = False
+
+                up_side.bone.select = True
+                bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(-3.5, -4.1))), orient_axis='X')
+                up_side.bone.select = False
+
+                upper_arm_L.bone.select = True
+                bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(10, 12))), orient_axis='X')
+                upper_arm_L.bone.select = False
+
+                upper_arm_R.bone.select = True
+                bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(10, 12))), orient_axis='X')
+                upper_arm_R.bone.select = False
+
+
 
 
                 if l == 0:
@@ -1471,34 +1499,183 @@ class Person:
                 self.record(self.frame)
                 self.final_result.append(self.save_coords(self.imu_data, self.frame))
 
+            mid_spine.bone.select = True
+            bpy.ops.pose.rot_clear()
+            mid_spine.bone.select = False
+
+            up_side.bone.select = True
+            bpy.ops.pose.rot_clear()
+            up_side.bone.select = False
+
+            upper_arm_L.bone.select = True
+            bpy.ops.pose.rot_clear()
+            upper_arm_L.bone.select = False
+
+            upper_arm_R.bone.select = True
+            bpy.ops.pose.rot_clear()
+            upper_arm_R.bone.select = False
+
+            bpy.context.object.pose.use_mirror_x = True
+            upper_arm_L.bone.select = True
+            bpy.ops.transform.rotate(value=-0.5, orient_axis='Y')
+            bpy.context.object.pose.use_mirror_x = False
+
+            self.frame = self.frame + random.uniform(5, 7)
+            self.record(self.frame)
+            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+
+            self.position = "Sitting_in_front_of_a_table"
+
+        else:
+            print(self.position)
+
+
+
 
     def standing_in_fron_of_a_table(self):
+        if self.position == "Sitting_in_front_of_a_table":
+            for l in range(0, 3):
+                thigh_L.bone.select = True
+                bpy.ops.transform.rotate(value=(math.radians(-26)), orient_axis='X')
+                thigh_L.bone.select = False
+
+                thigh_R.bone.select = True
+                bpy.ops.transform.rotate(value=(math.radians(-26)), orient_axis='X')
+                thigh_R.bone.select = False
+
+                shin_L.bone.select = True
+                bpy.ops.transform.rotate(value=(math.radians(26)), orient_axis='X')
+                shin_L.bone.select = False
+
+                shin_R.bone.select = True
+                bpy.ops.transform.rotate(value=(math.radians(26)), orient_axis='X')
+                shin_R.bone.select = False
+
+                foot_L.bone.select = True
+                bpy.ops.transform.rotate(value=(math.radians(1)), orient_axis='X')
+                foot_L.bone.select = False
+
+                foot_R.bone.select = True
+                bpy.ops.transform.rotate(value=(math.radians(1)), orient_axis='X')
+                foot_R.bone.select = False
+
+                mid_spine.bone.select = True
+                bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(-3.5, -4.1))), orient_axis='X')
+                mid_spine.bone.select = False
+
+                up_side.bone.select = True
+                bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(-3.5, -4.1))), orient_axis='X')
+                up_side.bone.select = False
+
+                upper_arm_L.bone.select = True
+                bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(10, 12))), orient_axis='X')
+                upper_arm_L.bone.select = False
+
+                upper_arm_R.bone.select = True
+                bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(10, 12))), orient_axis='X')
+                upper_arm_R.bone.select = False
+
+                if l == 2:
+                    main_spine.bone.select = True
+                    bpy.ops.transform.translate(value=(0.0, (math.radians(-12)), (math.radians(6))))
+                    main_spine.bone.select = False
+                elif l == 1:
+                    main_spine.bone.select = True
+                    bpy.ops.transform.translate(value=(0.0, (math.radians(-10)), (math.radians(8))))
+                    main_spine.bone.select = False
+                elif l == 0:
+                    main_spine.bone.select = True
+                    bpy.ops.transform.translate(value=(0.0, (math.radians(-5)), (math.radians(13))))
+                    main_spine.bone.select = False
+
+                self.frame = self.frame + random.uniform(3, 5)
+                self.record(self.frame)
+                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+
+            mid_spine.bone.select = True
+            bpy.ops.pose.rot_clear()
+            mid_spine.bone.select = False
+
+            up_side.bone.select = True
+            bpy.ops.pose.rot_clear()
+            up_side.bone.select = False
+
+            upper_arm_L.bone.select = True
+            bpy.ops.pose.rot_clear()
+            upper_arm_L.bone.select = False
+
+            upper_arm_R.bone.select = True
+            bpy.ops.pose.rot_clear()
+            upper_arm_R.bone.select = False
+
+            bpy.context.object.pose.use_mirror_x = True
+            upper_arm_L.bone.select = True
+            bpy.ops.transform.rotate(value=-0.5, orient_axis='Y')
+            bpy.context.object.pose.use_mirror_x = False
+            self.position = "Standing"
+        else:
+            print(self.position)
+
+    def _crossing_legs(self):
+
+
+        thigh_R.constraints["Limit Rotation"].use_limit_x = False
+        thigh_R.constraints["Limit Rotation"].use_limit_y = False
+        thigh_R.constraints["Limit Rotation"].use_limit_z = False
+
+        thigh_L.constraints["Limit Rotation"].use_limit_x = False
+        thigh_L.constraints["Limit Rotation"].use_limit_y = False
+        thigh_L.constraints["Limit Rotation"].use_limit_z = False
+
+        shin_R.constraints["Limit Rotation"].use_limit_x = False
+        shin_R.constraints["Limit Rotation"].use_limit_y = False
+        shin_R.constraints["Limit Rotation"].use_limit_z = False
+
+        shin_L.constraints["Limit Rotation"].use_limit_x = False
+        shin_L.constraints["Limit Rotation"].use_limit_y = False
+        shin_L.constraints["Limit Rotation"].use_limit_z = False
+
+        #thigh_R.constraints["Limit Rotation"].use_limit_x = True
+        #thigh_R.constraints["Limit Rotation"].use_limit_y = True
+        #thigh_R.constraints["Limit Rotation"].use_limit_z = True
+
+
+
+
+    def _crossing_arms(self):
 
         shin_R.bone.select = True
         self.rsp = (math.radians(-self.shin_m)) + self.rsp
         bpy.ops.transform.rotate(value=(math.radians(-self.shin_m)), orient_axis='X')
         shin_R.bone.select = False
 
-    def __crossing_legs(self):
+    def _looking_around(self):
 
-        shin_R.bone.select = True
-        self.rsp = (math.radians(-self.shin_m)) + self.rsp
-        bpy.ops.transform.rotate(value=(math.radians(-self.shin_m)), orient_axis='X')
-        shin_R.bone.select = False
+        neck.bone.select = True
+        bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(40, 45))), orient_axis='Z')
+        neck.bone.select = False
 
-    def __crossing_arms(self):
+        self.frame = self.frame + random.uniform(7, 10)
+        self.record(self.frame)
+        self.final_result.append(self.save_coords(self.imu_data, self.frame))
 
-        shin_R.bone.select = True
-        self.rsp = (math.radians(-self.shin_m)) + self.rsp
-        bpy.ops.transform.rotate(value=(math.radians(-self.shin_m)), orient_axis='X')
-        shin_R.bone.select = False
+        neck.bone.select = True
+        bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(-80, -75))), orient_axis='Z')
+        neck.bone.select = False
 
-    def __looking_around(self):
+        self.frame = self.frame + random.uniform(15, 20)
+        self.record(self.frame)
+        self.final_result.append(self.save_coords(self.imu_data, self.frame))
 
-        shin_R.bone.select = True
-        self.rsp = (math.radians(-self.shin_m)) + self.rsp
-        bpy.ops.transform.rotate(value=(math.radians(-self.shin_m)), orient_axis='X')
-        shin_R.bone.select = False
+        neck.bone.select = True
+        bpy.ops.pose.rot_clear()
+        neck.bone.select = False
+
+        self.frame = self.frame + random.uniform(7, 10)
+        self.record(self.frame)
+        self.final_result.append(self.save_coords(self.imu_data, self.frame))
+
+
 
 
 
@@ -1514,6 +1691,9 @@ new.sitting_half_raised()
 new.standing_from_half_raised()
 new.wait(6)
 new.sitting_in_fron_of_a_table()
+new.wait(6)
+new.standing_in_fron_of_a_table()
+
 
 
 
