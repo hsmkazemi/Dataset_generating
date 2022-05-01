@@ -13,14 +13,14 @@ bpy.ops.object.armature_basic_human_metarig_add()
 bpy.ops.object.editmode_toggle()
 
 bpy.ops.armature.bone_primitive_add(name='guide')
-
-
 bpy.ops.object.posemode_toggle()
 
+rotation = math.radians(90)
 bpy.data.objects['metarig'].pose.bones['guide'].bone.select = True
+bpy.ops.transform.create_orientation(name='Track', use_view=False, use=False, overwrite=False)
 bpy.ops.transform.resize(value=(0.1, 0.1, 0.1))
-bpy.ops.transform.rotate(value=(math.radians(90)), orient_axis='X', orient_type='LOCAL')
-bpy.ops.transform.create_orientation(name='Track')
+bpy.ops.transform.rotate(value=rotation, orient_axis='X', orient_type='LOCAL')
+bpy.ops.transform.create_orientation(name='Track', use_view=False, use=False, overwrite=True)
 bpy.data.objects['metarig'].pose.bones['guide'].bone.select = False
 
 bpy.context.scene.tool_settings.use_keyframe_insert_auto = True
@@ -36,6 +36,7 @@ bpy.context.object.pose.use_mirror_x = True
 
 bpy.data.objects['metarig'].pose.bones['upper_arm.L'].bone.select = True
 bpy.ops.transform.rotate(value = -0.5, orient_axis = 'Y')
+bpy.data.objects['metarig'].pose.bones['upper_arm.L'].bone.select = False
 bpy.context.object.pose.use_mirror_x = False
 bpy.ops.pose.select_all(action='SELECT')
 bpy.ops.pose.armature_apply(selected=True)
@@ -294,15 +295,16 @@ class Person:
         self.spine_m = factor * 2
         self.fc = frame_constant  # frame constant respectively sampling rate 30 Hz means every 1/30 sec a new sample
         self.position = "Standing"
+        self.turn(0)
         #record(1)
 
     def thigh_m_random(self):
             return np.random.normal(10 * self.factor, 0.1)
 
-    def trun(self, degree):
+    def turn(self, degree):
         guide.bone.select = True
         bpy.ops.transform.rotate(value=(math.radians(degree)), orient_axis='Z', orient_type='LOCAL')
-        bpy.ops.transform.create_orientation(name='Track')
+        bpy.ops.transform.create_orientation(name='Track', use_view=False, use=False, overwrite=True )
         guide.bone.select = False
 
         main_spine.bone.select = True
@@ -410,7 +412,7 @@ class Person:
 
             main_spine.bone.select = True
             self.msz = (math.radians(-self.spine_m)) + self.msz
-            bpy.ops.transform.translate(value=(0.0, (math.radians(-self.thigh_m_random())), (math.radians(-self.spine_m))), orient_axis_ortho='Y', orient_type='Track')
+            bpy.ops.transform.translate(value=(0.0, (math.radians(-self.thigh_m_random())), (math.radians(-self.spine_m))), orient_type='Track') # , orient_axis_ortho='Y'
             main_spine.bone.select = False
 
             upper_arm_L.bone.select = True
@@ -433,7 +435,8 @@ class Person:
 
     def walk_straight(self, radius, steps=0): # position 1->2
         if self.position == "Start_walking" :
-            self.trun(radius)
+            angle = radius
+            self.turn(angle)
 
             for iteration in range(0, steps):
 
@@ -449,7 +452,7 @@ class Person:
 
                 main_spine.bone.select = True
                 self.msz = (math.radians(-self.spine_m)) + self.msz
-                bpy.ops.transform.translate(value=(0.0, 0.0, (math.radians(-self.spine_m))), orient_axis_ortho='Y', orient_type='Track')
+                bpy.ops.transform.translate(value=(0.0, 0.0, (math.radians(-self.spine_m))), orient_type='Track') # , orient_axis_ortho='Y'
                 main_spine.bone.select = False
 
                 upper_arm_L.bone.select = True
@@ -468,7 +471,7 @@ class Person:
 
                 main_spine.bone.select = True
                 self.msz = (math.radians(self.spine_m)) + self.msz
-                bpy.ops.transform.translate(value=(0.0, (math.radians(-self.thigh_m_random())), (math.radians(self.spine_m))), orient_axis_ortho='Y', orient_type='Track')
+                bpy.ops.transform.translate(value=(0.0, (math.radians(-self.thigh_m_random())), (math.radians(self.spine_m))), orient_type='Track') # , orient_axis_ortho='Y'
                 main_spine.bone.select = False
 
                 thigh_R.bone.select = True
@@ -497,7 +500,7 @@ class Person:
 
                 main_spine.bone.select = True
                 self.msz = (math.radians(self.spine_m)) + self.msz
-                bpy.ops.transform.translate(value=(0.0, (math.radians(-self.thigh_m_random())), (math.radians(self.spine_m))), orient_axis_ortho='Y', orient_type='Track')
+                bpy.ops.transform.translate(value=(0.0, (math.radians(-self.thigh_m_random())), (math.radians(self.spine_m))), orient_type='Track') # , orient_axis_ortho='Y'
                 main_spine.bone.select = False
 
                 upper_arm_R.bone.select = True
@@ -521,7 +524,7 @@ class Person:
 
                 main_spine.bone.select = True
                 self.msz = (math.radians(-self.spine_m)) + self.msz
-                bpy.ops.transform.translate(value=(0.0, (math.radians(-self.thigh_m_random())), (math.radians(-self.spine_m))), orient_axis_ortho='Y', orient_type='Track')
+                bpy.ops.transform.translate(value=(0.0, (math.radians(-self.thigh_m_random())), (math.radians(-self.spine_m))), orient_type='Track') # , orient_axis_ortho='Y'
                 main_spine.bone.select = False
 
                 thigh_R.bone.select = True
@@ -567,7 +570,7 @@ class Person:
 
                 main_spine.bone.select = True
                 self.msz = (math.radians(-self.spine_m)) + self.msz
-                bpy.ops.transform.translate(value=(0.0, 0.0, (math.radians(-self.spine_m))), orient_axis_ortho='Y', orient_type='Track')
+                bpy.ops.transform.translate(value=(0.0, 0.0, (math.radians(-self.spine_m))), orient_type='Track') # , orient_axis_ortho='Y'
                 main_spine.bone.select = False
 
                 upper_arm_L.bone.select = True
@@ -596,7 +599,7 @@ class Person:
 
                 main_spine.bone.select = True
                 self.msz = (math.radians(self.spine_m)) + self.msz
-                bpy.ops.transform.translate(value=(0.0, (math.radians(-self.thigh_m_random())), (math.radians(self.spine_m))), orient_axis_ortho='Y', orient_type='Track')
+                bpy.ops.transform.translate(value=(0.0, (math.radians(-self.thigh_m_random())), (math.radians(self.spine_m))), orient_type='Track') # , orient_axis_ortho='Y'
                 main_spine.bone.select = False
 
                 upper_arm_L.bone.select = True
@@ -630,7 +633,7 @@ class Person:
 
                 main_spine.bone.select = True
                 self.msz = (math.radians(self.spine_m)) + self.msz
-                bpy.ops.transform.translate(value=(0.0, (math.radians(-self.thigh_m_random())), (math.radians(self.spine_m))), orient_axis_ortho='Y', orient_type='Track')
+                bpy.ops.transform.translate(value=(0.0, (math.radians(-self.thigh_m_random())), (math.radians(self.spine_m))), orient_type='Track') # , orient_axis_ortho='Y'
                 main_spine.bone.select = False
 
                 thigh_L.bone.select = True
@@ -659,7 +662,7 @@ class Person:
 
                 main_spine.bone.select = True
                 self.msz = (math.radians(-self.spine_m)) + self.msz
-                bpy.ops.transform.translate(value=(0.0, (math.radians(-self.thigh_m_random())), (math.radians(-self.spine_m))), orient_axis_ortho='Y', orient_type='Track')
+                bpy.ops.transform.translate(value=(0.0, (math.radians(-self.thigh_m_random())), (math.radians(-self.spine_m))), orient_type='Track') # , orient_axis_ortho='Y'
                 main_spine.bone.select = False
 
                 thigh_L.bone.select = True
@@ -712,7 +715,7 @@ class Person:
             bpy.context.object.pose.use_mirror_x = False
 
             main_spine.bone.select = True
-            bpy.ops.transform.translate(value=(0.0, (math.radians(-self.thigh_m_random())), 0.0))
+            bpy.ops.transform.translate(value=(0.0, (math.radians(-self.thigh_m_random())), 0.0), orient_type='Track')
             main_spine.bone.select = False
 
 
@@ -1693,6 +1696,9 @@ new.wait(6)
 new.sitting_in_fron_of_a_table()
 new.wait(6)
 new.standing_in_fron_of_a_table()
+new.start_walking()
+new.walk_straight(0, 5)
+new.stop_walking()
 
 
 
