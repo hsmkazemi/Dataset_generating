@@ -18,7 +18,7 @@ bpy.ops.object.posemode_toggle()
 rotation = math.radians(90)
 bpy.data.objects['metarig'].pose.bones['guide'].bone.select = True
 bpy.ops.transform.create_orientation(name='Track', use_view=False, use=False, overwrite=False)
-bpy.ops.transform.resize(value=(0.1, 0.1, 0.1))
+bpy.ops.transform.resize(value=(0.001, 0.001, 0.001))
 bpy.ops.transform.rotate(value=rotation, orient_axis='X', orient_type='LOCAL')
 bpy.ops.transform.create_orientation(name='Track', use_view=False, use=False, overwrite=True)
 bpy.data.objects['metarig'].pose.bones['guide'].bone.select = False
@@ -711,7 +711,7 @@ class Person:
 
             bpy.context.object.pose.use_mirror_x = True
             bpy.data.objects['metarig'].pose.bones['upper_arm.L'].bone.select = True
-            bpy.ops.transform.rotate(value=-0.5, orient_axis='Y')
+            bpy.ops.transform.rotate(value=-0.5, orient_axis='Y', orient_type='Track')
             bpy.context.object.pose.use_mirror_x = False
 
             main_spine.bone.select = True
@@ -1686,16 +1686,9 @@ new = Person(0.66, 5)
 new.start_walking()
 new.walk_straight(15, 5)
 new.stop_walking()
-new.sitting_half_raised()
-new.lying_down()
+
 new.wait(6)
-new.standing_from_lying()
-new.sitting_half_raised()
-new.standing_from_half_raised()
-new.wait(6)
-new.sitting_in_fron_of_a_table()
-new.wait(6)
-new.standing_in_fron_of_a_table()
+
 new.start_walking()
 new.walk_straight(0, 5)
 new.stop_walking()
