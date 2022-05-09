@@ -283,7 +283,7 @@ class Person:
     ruap = 0  # right upper arm position
     luap = 0  # left upper arm position
     fc = 0
-    angle = 0
+    #angle = 0
     final_result = []
     position = 0 #1 start walking #2 walkning straight #3 stop walking #4 sitting #5 lying down #0 standing
 
@@ -297,6 +297,7 @@ class Person:
         self.fc = frame_constant  # frame constant respectively sampling rate 30 Hz means every 1/30 sec a new sample
         self.position = "Standing"
         self._turn(0)
+        self.use_random_keyframes = False
         #record(1)
 
     def thigh_m_random(self):
@@ -318,15 +319,20 @@ class Person:
         main_spine.bone.select = False
 
 
-    def record(self, frame_num):
+    def record(self, frame_num, boundaries=(7,10)):
         # frame_num = constsant + frame_num
+        if self.use_random_keyframes:
+            self.frame = self.frame + random.uniform(boundaries[0], boundaries[1])
+        else:
+            self.frame = self.frame + 8
+
         bpy.ops.pose.select_all(action='SELECT')
         bpy.context.scene.frame_set(int(frame_num))
         bpy.ops.anim.keyframe_insert_menu(type='BUILTIN_KSI_LocRot')
 
         bpy.ops.pose.select_all(action='INVERT')
 
-    def save_coords(self,imu_data, frame):
+    def save_coords(self,imu_data, frame, label):
         resulting_list = []
         for bone in imu_data:
             result = np.array(bone.matrix)[:3, :4]
@@ -343,14 +349,27 @@ class Person:
 
             resulting_list.extend(sensor_location + sensor_rotation)
 
-        resulting_list = resulting_list + [frame]
+        resulting_list = resulting_list + [frame] + [label]
 
         return resulting_list
 
     def wait(self,time):
         for line in range(0,time):
-            self.frame = self.frame + random.uniform(6, 5)  # frame = 10
+            # self.frame = self.frame + random.uniform(6, 5)  # frame = 10
             self.record(self.frame)
+            if "Standing" == self.position:
+                label = 1.0
+            elif "walk" in self.position.lower():
+                label = 2.0
+            elif "sitting" in self.position.lower():
+                label = 3.0
+            elif "Lying_down" == self.position:
+                label = 4.0
+            else:
+                print("Label not defined")
+                sys.exit("Label not defined")
+
+            self.final_result.append(self.save_coords(self.imu_data, self.frame, label))
 
         if self.position == "Sitting_in_front_of_a_table" and time >= 3:
             self.looking_around()
@@ -382,7 +401,7 @@ class Person:
 
             self.frame = self.frame + self.fc  # frame = 5
             self.record(self.frame)
-            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+            self.final_result.append(self.save_coords(self.imu_data, self.frame, 2.0))
 
             thigh_L.bone.select = True
             self.ltp = (math.radians(self.thigh_m_random())) + self.ltp
@@ -406,7 +425,7 @@ class Person:
 
             self.frame = self.frame + self.fc  # frame = 10
             self.record(self.frame)
-            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+            self.final_result.append(self.save_coords(self.imu_data, self.frame, 2.0))
 
             thigh_R.bone.select = True
             self.rtp = (math.radians(-self.thigh_m_random())) + self.rtp
@@ -425,7 +444,7 @@ class Person:
 
             self.frame = self.frame + self.fc  # frame = 15
             self.record(self.frame)
-            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+            self.final_result.append(self.save_coords(self.imu_data, self.frame, 2.0))
 
             #self.final_result = np.array(self.final_result)
             #np.savetxt(coord_file_path, self.final_result, "%.10g")
@@ -436,8 +455,8 @@ class Person:
             print(self.position)
 
     def walk_straight(self, radius, steps=0, radius_step=2): # position 1->2
-        if self.position == "Start_walking" or "Walking_straight":
-            self.angle = radius
+        if self.position == "Start_walking" or "Walk_straight":
+            #self.angle = radius
             #self._turn(angle)
             angle_counter = 0
 
@@ -466,9 +485,9 @@ class Person:
                 bpy.ops.transform.rotate(value=(math.radians(self.hand_m)), orient_axis='X', orient_type='Track')
                 upper_arm_L.bone.select = False
 
-                self.frame = self.frame + random.uniform(3,5) # self.fc  # frame = 30
+                # self.frame = self.frame + random.uniform(3,5) # self.fc  # frame = 30
                 self.record(self.frame)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 2.0))
 
                 thigh_L.bone.select = True
                 self.ltp = (math.radians(-self.thigh_m_random())) + self.ltp
@@ -495,9 +514,9 @@ class Person:
                 bpy.ops.transform.rotate(value=(math.radians(self.hand_m)), orient_axis='X', orient_type='Track')
                 upper_arm_L.bone.select = False
 
-                self.frame = self.frame + random.uniform(3,5) # self.fc  # frame = 35
+                # self.frame = self.frame + random.uniform(3,5) # self.fc  # frame = 35
                 self.record(self.frame)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 2.0))
 
                 thigh_L.bone.select = True
                 self.ltp = (math.radians(-self.thigh_m_random())) + self.ltp
@@ -519,7 +538,7 @@ class Person:
                 bpy.ops.transform.rotate(value=(math.radians(-self.hand_m)), orient_axis='X', orient_type='Track')
                 forearm_R.bone.select = False
 
-                self.frame = self.frame + random.uniform(3,5) # self.fc  # frame = 40
+                #self.frame = self.frame + random.uniform(3,5) # self.fc  # frame = 40
                 self.record(self.frame)
                 ###final_result.append(save_coords(imu_data, frame))
 
@@ -560,7 +579,7 @@ class Person:
 
                 # relying on the right leg
 
-                self.frame = self.frame + random.uniform(3,5) # self.fc  # frame = 45
+                #self.frame = self.frame + random.uniform(3,5) # self.fc  # frame = 45
                 self.record(self.frame)
                 ###final_result.append(save_coords(imu_data, frame))
 
@@ -594,9 +613,9 @@ class Person:
                 bpy.ops.transform.rotate(value=(math.radians(self.hand_m)), orient_axis='X', orient_type='Track')
                 upper_arm_R.bone.select = False
 
-                self.frame = self.frame + random.uniform(3,5) # self.fc  # frame = 50
+                #self.frame = self.frame + random.uniform(3,5) # self.fc  # frame = 50
                 self.record(self.frame)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 2.0))
 
                 thigh_R.bone.select = True
                 self.rtp = (math.radians(-self.thigh_m_random())) + self.rtp
@@ -628,9 +647,9 @@ class Person:
                 bpy.ops.transform.rotate(value=(math.radians(self.hand_m)), orient_axis='X', orient_type='Track')
                 upper_arm_R.bone.select = False
 
-                self.frame = self.frame + random.uniform(3,5) # self.fc  # frame = 55
+                #self.frame = self.frame + random.uniform(3,5) # self.fc  # frame = 55
                 self.record(self.frame)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 2.0))
 
                 thigh_R.bone.select = True
                 self.rtp = (math.radians(-self.thigh_m_random())) + self.rtp
@@ -657,9 +676,9 @@ class Person:
                 # bpy.ops.transform.rotate(value=(math.radians(-hand_m)), orient_axis='X')
                 # upper_arm_R.bone.select = False
 
-                self.frame = self.frame + random.uniform(3,5) # self.fc  # frame = 60
+                #self.frame = self.frame + random.uniform(3,5) # self.fc  # frame = 60
                 self.record(self.frame)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 2.0))
 
                 thigh_R.bone.select = True
                 self.rtp = (math.radians(-self.thigh_m_random())) + self.rtp
@@ -691,7 +710,7 @@ class Person:
                 bpy.ops.transform.rotate(value=(math.radians(self.hand_m)), orient_axis='X', orient_type='Track')
                 forearm_R.bone.select = False
 
-                self.frame = self.frame + random.uniform(3,5) # self.fc  # frame = 65
+                #self.frame = self.frame + random.uniform(3,5) # self.fc  # frame = 65
                 self.record(self.frame)
 
 
@@ -702,13 +721,13 @@ class Person:
             #self.final_result = np.array(self.final_result)
             #np.savetxt(coord_file_path, self.final_result, "%.10g")
             #self.final_result = []
-            self.position = "Walking_straight"
+            self.position = "Walk_straight"
         else:
             print(self.position)
 
     def stop_walking(self): # position 2->0
 
-        if self.position == "Walking_straight":
+        if self.position == "Walk_straight":
             #self._turn(self.angle)
 
             for stable in self.parts:
@@ -730,7 +749,7 @@ class Person:
 
             self.frame = self.frame + self.fc +2
             self.record(self.frame)
-            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+            self.final_result.append(self.save_coords(self.imu_data, self.frame, 1.0))
 
             #self.final_result = np.array(self.final_result)
             #np.savetxt(coord_file_path, self.final_result, "%.10g")
@@ -801,9 +820,9 @@ class Person:
                     bpy.ops.transform.translate(value=(0.0, 0.0, (math.radians(-20.5))), orient_type='GLOBAL')
                     main_spine.bone.select = False
 
-                self.frame = self.frame + random.uniform(3,5)
-                self.record(self.frame)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                #self.frame = self.frame + random.uniform(3,5)
+                self.record(self.frame, boundaries=(3,5))
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 3.0))
 
 
             #self.final_result = np.array(self.final_result)
@@ -834,8 +853,8 @@ class Person:
 
 
                 self.record(self.frame)
-                self.frame = self.frame + random.uniform(3, 5)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                #self.frame = self.frame + random.uniform(3, 5)
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 4.0))
 
             for n in range(0,3):
                 main_spine.bone.select = True
@@ -881,8 +900,8 @@ class Person:
 
 
                 self.record(self.frame)
-                self.frame = self.frame + random.uniform(3, 5)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                #self.frame = self.frame + random.uniform(3, 5)
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 4.0))
 
             for m in range(0,3):
                 upper_arm_L.bone.select = True
@@ -921,8 +940,8 @@ class Person:
                 #thigh_L.bone.select = False
 
                 self.record(self.frame)
-                self.frame = self.frame + random.uniform(3, 5)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                #self.frame = self.frame + random.uniform(3, 5)
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 4.0))
 
             for k in range(0,3):
                 shin_L.bone.select = True
@@ -968,8 +987,8 @@ class Person:
                 upper_arm_R.bone.select = False
 
                 self.record(self.frame)
-                self.frame = self.frame + random.uniform(3, 5)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                #self.frame = self.frame + random.uniform(3, 5)
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 4.0))
 
             for o in range(0,3):
 
@@ -1010,8 +1029,8 @@ class Person:
 
 
                 self.record(self.frame)
-                self.frame = self.frame + random.uniform(3, 5)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                #self.frame = self.frame + random.uniform(3, 5)
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 4.0))
 
             for last in range(0,3):
                 main_spine.bone.select = True
@@ -1043,8 +1062,8 @@ class Person:
                 thigh_L.bone.select = False
 
                 self.record(self.frame)
-                self.frame = self.frame + random.uniform(3, 5)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                #self.frame = self.frame + random.uniform(3, 5)
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 4.0))
 
             for stable in self.parts:
                 stable.bone.select = True
@@ -1053,8 +1072,8 @@ class Person:
 
 
             self.record(self.frame)
-            self.frame = self.frame + random.uniform(1,2)
-            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+            #self.frame = self.frame + random.uniform(1,2)
+            self.final_result.append(self.save_coords(self.imu_data, self.frame, 4.0))
 
 
             self.position = "Lying_down"
@@ -1104,8 +1123,8 @@ class Person:
                 thigh_L.bone.select = False
 
                 self.record(self.frame)
-                self.frame = self.frame + random.uniform(3, 5)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                #self.frame = self.frame + random.uniform(3, 5)
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 1.0))
 
             for mid in range(0,6):
 
@@ -1126,7 +1145,7 @@ class Person:
                 forearm_R.bone.select = False
 
                 self.record(self.frame)
-                self.frame = self.frame + random.uniform(1, 2)
+                #self.frame = self.frame + random.uniform(1, 2)
 
 
 
@@ -1172,8 +1191,8 @@ class Person:
                 hand_L.bone.select = False
 
                 self.record(self.frame)
-                self.frame = self.frame + random.uniform(3, 5)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                #self.frame = self.frame + random.uniform(3, 5)
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 1.0))
 
             for third in range(0,3):
                 shin_L.bone.select = True
@@ -1219,8 +1238,8 @@ class Person:
                 upper_arm_R.bone.select = False
 
                 self.record(self.frame)
-                self.frame = self.frame + random.uniform(3, 5)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                #self.frame = self.frame + random.uniform(3, 5)
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 1.0))
 
             for fourth in range(0,3):
                 upper_arm_L.bone.select = True
@@ -1251,8 +1270,8 @@ class Person:
 
 
                 self.record(self.frame)
-                self.frame = self.frame + random.uniform(3, 5)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                #self.frame = self.frame + random.uniform(3, 5)
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 1.0))
 
             for fifth in range(0,3):
                 main_spine.bone.select = True
@@ -1303,8 +1322,8 @@ class Person:
 
 
                 self.record(self.frame)
-                self.frame = self.frame + random.uniform(3, 5)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                #self.frame = self.frame + random.uniform(3, 5)
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 1.0))
 
             for before_standing in range(0,3):
                 mid_spine.bone.select = True
@@ -1323,8 +1342,8 @@ class Person:
 
 
                 self.record(self.frame)
-                self.frame = self.frame + random.uniform(3, 5)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                #self.frame = self.frame + random.uniform(3, 5)
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 1.0))
 
             for upper in self.upper_side:
                 upper.bone.select = True
@@ -1337,8 +1356,8 @@ class Person:
             bpy.context.object.pose.use_mirror_x = False
 
             self.record(self.frame)
-            self.frame = self.frame + random.uniform(3, 5)
-            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+            #self.frame = self.frame + random.uniform(3, 5)
+            self.final_result.append(self.save_coords(self.imu_data, self.frame, 1.0))
 
             for sixth in range(0,3):
                 thigh_L.bone.select = True
@@ -1382,9 +1401,9 @@ class Person:
 
 
 
-                self.frame = self.frame + random.uniform(3,5)
+                #self.frame = self.frame + random.uniform(3,5)
                 self.record(self.frame)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 1.0))
 
             for each in self.parts:
                 each.bone.select = True
@@ -1401,8 +1420,8 @@ class Person:
             bpy.context.object.pose.use_mirror_x = False
 
             self.record(self.frame)
-            self.frame = self.frame + random.uniform(3, 5)
-            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+            #self.frame = self.frame + random.uniform(3, 5)
+            self.final_result.append(self.save_coords(self.imu_data, self.frame, 1.0))
 
 
             #self.final_result = np.array(self.final_result)
@@ -1415,7 +1434,7 @@ class Person:
     def standing_from_half_raised(self):
         if self.position == "Sitting_half_raised":
 
-            self._turn(self.angle)
+            #self._turn(self.angle)
 
             for stand in range(0,3):
                 thigh_L.bone.select = True
@@ -1456,9 +1475,9 @@ class Person:
                     bpy.ops.transform.translate(value = (0.0,(math.radians(-2.75)), (math.radians(9))), orient_type='Track')
                     main_spine.bone.select = False
 
-                self.frame = self.frame + random.uniform(3, 5)
+                #self.frame = self.frame + random.uniform(3, 5)
                 self.record(self.frame)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 1.0))
 
             for each in self.parts:
                 each.bone.select = True
@@ -1471,8 +1490,8 @@ class Person:
             bpy.context.object.pose.use_mirror_x = False
 
             self.record(self.frame)
-            self.frame = self.frame + random.uniform(3, 5)
-            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+            #self.frame = self.frame + random.uniform(3, 5)
+            self.final_result.append(self.save_coords(self.imu_data, self.frame, 1.0))
 
             #self.final_result = np.array(self.final_result)
             #np.savetxt(coord_file_path, self.final_result, "%.10g")
@@ -1543,9 +1562,9 @@ class Person:
                     bpy.ops.transform.translate(value=(0.0, (math.radians(5)), (math.radians(-13))), orient_type='Track')
                     main_spine.bone.select = False
 
-                self.frame = self.frame + random.uniform(3,5)
+                #self.frame = self.frame + random.uniform(3,5)
                 self.record(self.frame)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 3.0))
 
             mid_spine.bone.select = True
             bpy.ops.pose.rot_clear()
@@ -1568,9 +1587,9 @@ class Person:
             bpy.ops.transform.rotate(value=-0.5, orient_axis='Y', orient_type='Track')
             bpy.context.object.pose.use_mirror_x = False
 
-            self.frame = self.frame + random.uniform(5, 7)
+            #self.frame = self.frame + random.uniform(5, 7)
             self.record(self.frame)
-            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+            self.final_result.append(self.save_coords(self.imu_data, self.frame, 3.0))
 
             self.position = "Sitting_in_front_of_a_table"
             #self.final_result.tolist()
@@ -1634,9 +1653,9 @@ class Person:
                     bpy.ops.transform.translate(value=(0.0, (math.radians(-5)), (math.radians(13))), orient_type='Track')
                     main_spine.bone.select = False
 
-                self.frame = self.frame + random.uniform(3, 5)
+                #self.frame = self.frame + random.uniform(3, 5)
                 self.record(self.frame)
-                self.final_result.append(self.save_coords(self.imu_data, self.frame))
+                self.final_result.append(self.save_coords(self.imu_data, self.frame, 1.0))
 
             mid_spine.bone.select = True
             bpy.ops.pose.rot_clear()
@@ -1671,32 +1690,32 @@ class Person:
 
     def looking_around(self):
 
-        if self.position == "Walking_straight":
+        if self.position == "Walk_straight":
             self.stop_walking()
 
             neck.bone.select = True
             bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(40, 45))), orient_axis='Z', orient_type='Track')
             neck.bone.select = False
 
-            self.frame = self.frame + random.uniform(7, 10)
+            # self.frame = self.frame + random.uniform(7, 10)
             self.record(self.frame)
-            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+            self.final_result.append(self.save_coords(self.imu_data, self.frame, 1.0))
 
             neck.bone.select = True
             bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(-80, -75))), orient_axis='Z', orient_type='Track')
             neck.bone.select = False
 
-            self.frame = self.frame + random.uniform(15, 20)
+            # self.frame = self.frame + random.uniform(15, 20)
             self.record(self.frame)
-            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+            self.final_result.append(self.save_coords(self.imu_data, self.frame, 1.0))
 
             neck.bone.select = True
             bpy.ops.pose.rot_clear()
             neck.bone.select = False
 
-            self.frame = self.frame + random.uniform(7, 10)
+
             self.record(self.frame)
-            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+            self.final_result.append(self.save_coords(self.imu_data, self.frame, 1.0))
 
             self.start_walking()
 
@@ -1705,30 +1724,33 @@ class Person:
             bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(40, 45))), orient_axis='Z', orient_type='Track')
             neck.bone.select = False
 
-            self.frame = self.frame + random.uniform(7, 10)
+            # self.frame = self.frame + random.uniform(7, 10)
             self.record(self.frame)
-            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+            self.final_result.append(self.save_coords(self.imu_data, self.frame, 3.0))
 
             neck.bone.select = True
             bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(-80, -75))), orient_axis='Z', orient_type='Track')
             neck.bone.select = False
 
-            self.frame = self.frame + random.uniform(15, 20)
+            # self.frame = self.frame + random.uniform(15, 20)
             self.record(self.frame)
-            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+            self.final_result.append(self.save_coords(self.imu_data, self.frame, 3.0))
 
             neck.bone.select = True
             bpy.ops.pose.rot_clear()
             neck.bone.select = False
 
-            self.frame = self.frame + random.uniform(7, 10)
+            # self.frame = self.frame + random.uniform(7, 10)
             self.record(self.frame)
-            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+            self.final_result.append(self.save_coords(self.imu_data, self.frame, 3.0))
 
 
 
-
-
+action_dict = {1.0: "Stand",
+               2.0: "Walk",
+               3.0: "Sit",
+               4.0: "Lie",
+               }
 
 
 new = Person(0.66, 5)
@@ -1765,6 +1787,7 @@ new.sitting_half_raised()
 new.lying_down()
 new.wait(3)
 new.standing_from_lying()
+
 new.start_walking()
 new.walk_straight(20, 50)
 new.looking_around()
