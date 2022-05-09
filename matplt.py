@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import cv2
 import time
 data = np.loadtxt("D:\\Codes\\Blender\\final_files\\coordinates.txt")
-print(data)
+
 
 
 
@@ -56,20 +56,20 @@ if use_opencv:
             # fig_3D.canvas.draw()
         #plt.show()
         head = data[frame, :3]
-        neck = data[frame, 3:6]
-        main_spine = data[frame, 6:9]
-        upper_arm_L = data[frame, 9:12]
-        forearm_L = data[frame, 12:15]
-        upper_arm_R = data[frame, 15:18]
-        forearm_R = data[frame, 18:21]
-        thigh_L = data[frame, 21:24]
-        shin_L = data[frame, 24:27]
-        thigh_R = data[frame, 27:30]
-        shin_R = data[frame, 30:33]
-        foot_R = data[frame, 33:36]
-        foot_L = data[frame, 36:39]
-        hand_R = data[frame, 39:42]
-        hand_L = data[frame, 42:45]
+        neck = data[frame, 12:15]
+        main_spine = data[frame, 24:27]
+        upper_arm_L = data[frame, 36:39]
+        forearm_L = data[frame, 48:51]
+        upper_arm_R = data[frame, 60:63]
+        forearm_R = data[frame, 72:75]
+        thigh_L = data[frame, 84:87]
+        shin_L = data[frame, 96:99]
+        thigh_R = data[frame, 108:111]
+        shin_R = data[frame, 120:123]
+        foot_R = data[frame, 132:135]
+        foot_L = data[frame, 144:147]
+        hand_R = data[frame, 156:159]
+        hand_L = data[frame, 168:171]
         print("neck =", neck)
         print("head =", head)
         ax_3D.plot([neck[0], head[0]],

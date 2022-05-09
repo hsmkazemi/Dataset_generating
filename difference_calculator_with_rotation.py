@@ -92,12 +92,12 @@ imu_data_rotation = (head_rotation, neck_rotation, main_spine_rotation, upper_ar
 
 def derivative_x(part, relation):
     max_element = np.amax(relation.astype(int))
-    print("part =", part)
-    print("len(part) =", len(part))
-    print("type(part) =", type(part))
+    #print("part =", part)
+    #print("len(part) =", len(part))
+    #print("type(part) =", type(part))
     if not isinstance(part, np.ndarray):
         part = np.array(part)
-    print("part.shape =", part.shape)
+    # print("part.shape =", part.shape)
     """
     if isinstance(part, list):
         first_op = [elem[:,0] for elem in part]
@@ -106,13 +106,13 @@ def derivative_x(part, relation):
     """
     first_op = part[:, 0]
     # first_op = [ary[:,0] for ary in part]
-    print("first_op =", first_op)
+    # print("first_op =", first_op)
     second_op = relation
     interpolation = interp1d(second_op, first_op, 'cubic',fill_value='extrapolate')
     bandwith = 1.0
     result_x = []
     derivate_frame = 1.0
-    print(max_element)
+    # print(max_element)
     for i in range(0, max_element):
 
         #print()
@@ -257,7 +257,7 @@ def execution(frame):
         operand2 = imu_data_rotation[each]
         for j in range(0,loop[0]):
             # print("operand1 =", operand1)
-            print("operand1.shape =", operand1.shape)
+            #print("operand1.shape =", operand1.shape)
             operand1_ = np.reshape(operand1[j,:],(3,1))
             # print("operand1_=", operand1_)
             # print("operand2[j] =", operand2[j])
@@ -336,8 +336,8 @@ def execution(frame):
     exe_list = np.concatenate((head_acc_final, neck_acc_final, main_spine_acc_final, upper_arm_L_acc_final, forearm_L_acc_final, upper_arm_R_acc_final, forearm_R_acc_final, thigh_L_acc_final, shin_L_acc_final, thigh_R_acc_final, shin_R_acc_final, foot_R_acc_final, foot_L_acc_final, hand_R_acc_final, hand_L_acc_final), axis=1)
     #pre_acc = []
 
-    print('foot_L_acc ', foot_L_acc_final)
-    print("foot_R_acc", foot_R_acc_final)
+    # print('foot_L_acc ', foot_L_acc_final)
+    # print("foot_R_acc", foot_R_acc_final)
     return exe_list
 
 final_list = execution(frame_numbers)

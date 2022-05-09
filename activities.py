@@ -28,7 +28,7 @@ bpy.context.object.pose.use_auto_ik = False
 
 #to bound the frames
 bpy.data.scenes['Scene'].frame_start = 0
-bpy.data.scenes['Scene'].frame_end = 500
+
 
 #to define a preferred reset pose
 bpy.context.object.pose.use_mirror_x = True
@@ -284,7 +284,6 @@ class Person:
     luap = 0  # left upper arm position
     fc = 0
     angle = 0
-    resulting_list = []
     final_result = []
     position = 0 #1 start walking #2 walkning straight #3 stop walking #4 sitting #5 lying down #0 standing
 
@@ -304,6 +303,7 @@ class Person:
             return np.random.normal(10 * self.factor, 0.1)
 
     def finish(self):
+        bpy.data.scenes['Scene'].frame_end = self.frame
         self.final_result = np.array(self.final_result)
         np.savetxt(coord_file_path, self.final_result, "%.10g")
 
@@ -327,7 +327,7 @@ class Person:
         bpy.ops.pose.select_all(action='INVERT')
 
     def save_coords(self,imu_data, frame):
-        self.resulting_list = []
+        resulting_list = []
         for bone in imu_data:
             result = np.array(bone.matrix)[:3, :4]
             location = result[:, -1]
@@ -341,29 +341,25 @@ class Person:
                     while k == 3:
                         k = 0
 
-            self.resulting_list.extend(sensor_location + sensor_rotation)
+            resulting_list.extend(sensor_location + sensor_rotation)
 
-        self.resulting_list = self.resulting_list + [frame]
+        resulting_list = resulting_list + [frame]
 
-        return self.resulting_list
+        return resulting_list
 
     def wait(self,time):
         for line in range(0,time):
-            if self.position == "Sitting_in_front_of_a_table" and time >= 3:
-                self._looking_around()
-                self.frame = self.frame + random.uniform(6,5)  # frame = 10
-                self.record(self.frame)
-            elif self.position == "Standing" and time >= 3:
-                #self._crossing_arms()
-                self.frame = self.frame + random.uniform(2,3)  # frame = 10
-                self.record(self.frame)
-            elif self.position == "Lying_down" and time >= 3:
-                self._crossing_legs()
-                self.frame = self.frame + random.uniform(2,3)  # frame = 10
-                self.record(self.frame)
-            else:
-                self.frame = self.frame + random.uniform(2,3)  # frame = 10
-                self.record(self.frame)
+            self.frame = self.frame + random.uniform(6, 5)  # frame = 10
+            self.record(self.frame)
+
+        if self.position == "Sitting_in_front_of_a_table" and time >= 3:
+            self.looking_around()
+
+        elif self.position == "Standing" and time >= 3:
+            self.looking_around()
+
+
+
 
 
     def start_walking(self): # position 0->1
@@ -713,7 +709,7 @@ class Person:
     def stop_walking(self): # position 2->0
 
         if self.position == "Walking_straight":
-            self._turn(self.angle)
+            #self._turn(self.angle)
 
             for stable in self.parts:
                 stable.bone.select = True
@@ -763,7 +759,7 @@ class Person:
 
     def sitting_half_raised(self): # position 0->3
         if self.position == "Standing":
-            self._turn(self.angle)
+            #self._turn(self.angle)
 
             for l in range(0,3):
                 thigh_L.bone.select = True
@@ -1060,9 +1056,7 @@ class Person:
             self.frame = self.frame + random.uniform(1,2)
             self.final_result.append(self.save_coords(self.imu_data, self.frame))
 
-            #self.final_result = np.array(self.final_result)
-            #np.savetxt(coord_file_path, self.final_result, "%.10g")
-            #self.final_result =[]
+
             self.position = "Lying_down"
 
 
@@ -1489,8 +1483,6 @@ class Person:
         else:
             print(self.position)
 
-
-
     def sitting_in_front_of_a_table(self):
         if self.position == "Standing":
             for l in range(0,3):
@@ -1586,9 +1578,6 @@ class Person:
         else:
             print(self.position)
 
-
-
-
     def standing_in_front_of_a_table(self):
         if self.position == "Sitting_in_front_of_a_table":
             for l in range(0, 3):
@@ -1680,32 +1669,63 @@ class Person:
     def _crossing_arms(self):
         pass
 
-    def _looking_around(self):
+    def looking_around(self):
+
+        if self.position == "Walking_straight":
+            self.stop_walking()
+
+            neck.bone.select = True
+            bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(40, 45))), orient_axis='Z', orient_type='Track')
+            neck.bone.select = False
+
+            self.frame = self.frame + random.uniform(7, 10)
+            self.record(self.frame)
+            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+
+            neck.bone.select = True
+            bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(-80, -75))), orient_axis='Z', orient_type='Track')
+            neck.bone.select = False
+
+            self.frame = self.frame + random.uniform(15, 20)
+            self.record(self.frame)
+            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+
+            neck.bone.select = True
+            bpy.ops.pose.rot_clear()
+            neck.bone.select = False
+
+            self.frame = self.frame + random.uniform(7, 10)
+            self.record(self.frame)
+            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+
+            self.start_walking()
+
+        else:
+            neck.bone.select = True
+            bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(40, 45))), orient_axis='Z', orient_type='Track')
+            neck.bone.select = False
+
+            self.frame = self.frame + random.uniform(7, 10)
+            self.record(self.frame)
+            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+
+            neck.bone.select = True
+            bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(-80, -75))), orient_axis='Z', orient_type='Track')
+            neck.bone.select = False
+
+            self.frame = self.frame + random.uniform(15, 20)
+            self.record(self.frame)
+            self.final_result.append(self.save_coords(self.imu_data, self.frame))
+
+            neck.bone.select = True
+            bpy.ops.pose.rot_clear()
+            neck.bone.select = False
+
+            self.frame = self.frame + random.uniform(7, 10)
+            self.record(self.frame)
+            self.final_result.append(self.save_coords(self.imu_data, self.frame))
 
 
-        neck.bone.select = True
-        bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(40, 45))), orient_axis='Z', orient_type='Track')
-        neck.bone.select = False
-
-        self.frame = self.frame + random.uniform(7, 10)
-        self.record(self.frame)
-        self.final_result.append(self.save_coords(self.imu_data, self.frame))
-
-        neck.bone.select = True
-        bpy.ops.transform.rotate(value=(math.radians(np.random.uniform(-80, -75))), orient_axis='Z', orient_type='Track')
-        neck.bone.select = False
-
-        self.frame = self.frame + random.uniform(15, 20)
-        self.record(self.frame)
-        self.final_result.append(self.save_coords(self.imu_data, self.frame))
-
-        neck.bone.select = True
-        bpy.ops.pose.rot_clear()
-        neck.bone.select = False
-
-        self.frame = self.frame + random.uniform(7, 10)
-        self.record(self.frame)
-        self.final_result.append(self.save_coords(self.imu_data, self.frame))
 
 
 
@@ -1713,14 +1733,22 @@ class Person:
 
 new = Person(0.66, 5)
 new.start_walking()
-new.walk_straight(20, 15)
+new.walk_straight(20, 50)
+new.looking_around()
+new.walk_straight(-10,60,-2)
+new.walk_straight(20, 50)
 new.stop_walking()
 
 new.sitting_half_raised()
 new.wait(5)
 new.standing_from_half_raised()
 new.wait(3)
-
+new.start_walking()
+new.walk_straight(20, 50)
+new.looking_around()
+new.walk_straight(-10,60,-2)
+new.walk_straight(20, 50)
+new.stop_walking()
 new.sitting_in_front_of_a_table()
 new.wait(5)
 new.standing_in_front_of_a_table()
@@ -1729,7 +1757,7 @@ new.standing_in_front_of_a_table()
 new.wait(6)
 
 new.start_walking()
-new.walk_straight(0, 15)
+new.walk_straight(-45, 80)
 new.stop_walking()
 
 new.wait(3)
@@ -1737,6 +1765,14 @@ new.sitting_half_raised()
 new.lying_down()
 new.wait(3)
 new.standing_from_lying()
+new.start_walking()
+new.walk_straight(20, 50)
+new.looking_around()
+new.walk_straight(-30,90,-4)
+new.walk_straight(45, 70)
+new.looking_around()
+new.stop_walking()
+new.looking_around()
 new.finish()
 
 
