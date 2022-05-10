@@ -55,7 +55,7 @@ hand_R_rot = data[ : , 159:168]
 hand_L_location = data[ : , 168:171]
 hand_L_rot = data[ : , 171:180]
 
-frame_numbers = data[:, -1]
+frame_numbers = data[:, -2]
 
 loop = np.shape(frame_numbers)
 col = np.reshape(frame_numbers, (loop[0],1))
