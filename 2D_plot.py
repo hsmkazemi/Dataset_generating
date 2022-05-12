@@ -41,11 +41,11 @@ hand_L_location = frame[ : , 168:171]
 
 
 
-frame_number = frame[: , -1]
-print(data)
+frame_number = frame[: , -2]
+#print(data)
 
 
-
+bone = hand_L_acc
 
 
 # ax_3D.view_init(90, 90)
@@ -69,20 +69,13 @@ z_acc.set_ylabel("Z acceleration")
 
 plt.tight_layout(pad=1.5)
 
-x_acc.plot(frame_number, shin_R_acc[:, 0])
-# x_acc.view_init(0, 0)
-y_acc.plot(frame_number, shin_R_acc[:, 1])
-# y_acc.view_init(0, 0)
-z_acc.plot(frame_number, shin_R_acc[:, 2])
+x_acc.plot(frame_number, bone[:, 0])
+#x_acc.view_init(0, 0)
+y_acc.plot(frame_number, bone[:, 1])
+#y_acc.view_init(0, 0)
+z_acc.plot(frame_number, bone[:, 2])
 
-# Assume there is a function my_walking(person_dict):
-def my_walking(person_dict):
-    pass
+plt.show()
 
-# Dictionary Idea from Matthias:
-person_dict = {"P_ID": 1,
-               # "path": {"straight" : [0, 15], "curve_right" : [(5, 27), (15, 64)]},
-               "path": ["S_15", "TR_5_27", "TL_1_5"],
-                }
 
-imu_data = my_walking(person_dict)
+

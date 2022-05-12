@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import cv2
 import time
 data = np.loadtxt("D:\\Codes\\Blender\\final_files\\coordinates.txt")
+#data = np.loadtxt("D:\\Codes\\Blender\\final_files\\coordinates_first_results.txt")
 
 
 
@@ -13,6 +14,14 @@ data = np.loadtxt("D:\\Codes\\Blender\\final_files\\coordinates.txt")
 # ax_3D.view_init(90, 90)
 
 colors = ["black", "blue", "red", "green", "yellow", "purple", "orange", "brown", "pink", "gray", "cyan"]
+
+
+action_dict = {1.0: "Stand",
+               2.0: "Walk",
+               3.0: "Sit",
+               4.0: "Lie",
+               }
+
 
 use_opencv = True
 if use_opencv:
@@ -32,9 +41,9 @@ if use_opencv:
         # fig_3D.suptitle(t="Frame " + str(frame_num), x=0.5, y=0.88, fontsize=18)
         ax_3D = fig_3D.add_subplot(111, projection='3d')
 
-        ax_3D.set_xlim([-1, 1])
-        ax_3D.set_ylim([-10, 0])
-        ax_3D.set_zlim([0, 2.0])
+        # ax_3D.set_xlim([-20, 20])
+        # ax_3D.set_ylim([-20, 20])
+        ax_3D.set_zlim([0, 2.5])
         '''ax_3D.set_xlim([-1, 1])
         ax_3D.set_ylim([-50, 0])
         ax_3D.set_zlim([0, 1.8])'''
@@ -43,15 +52,21 @@ if use_opencv:
         ax_3D.set_ylabel("y-Axis")
         ax_3D.set_zlabel("z-Axis")
         plt.tight_layout()
-        ax_3D.view_init(0, 0)
+        # ax_3D.view_init(0, 0)
+        ax_3D.view_init(10, -15)
 
-        for i in np.arange(0, len(data[0])//3, 3):
+        label = data[frame, -1]
+        keyframe = data[frame, -2]
+        plt.title(action_dict[label], fontsize=15)
+
+        for i in np.arange(0, len(data[0])-2, 12):
             x_col = data[frame,i]
             y_col = data[frame,i+1]
             z_col = data[frame,i+2]
-            print("x_col =", x_col)
-            print("y_col =", y_col)
-            print("z_col =", z_col)
+            #print("x_col =", x_col)
+            #print("y_col =", y_col)
+            x = len(data[0])-2
+            #print("z_col =", z_col)
             ax_3D.scatter(x_col, y_col, z_col, c=colors[i % len(colors)])
             # fig_3D.canvas.draw()
         #plt.show()
@@ -70,8 +85,8 @@ if use_opencv:
         foot_L = data[frame, 144:147]
         hand_R = data[frame, 156:159]
         hand_L = data[frame, 168:171]
-        print("neck =", neck)
-        print("head =", head)
+        #print("neck =", neck)
+        #print("head =", head)
         ax_3D.plot([neck[0], head[0]],
                    [neck[1], head[1]],
                    [neck[2], head[2]], c="black")
@@ -102,12 +117,15 @@ if use_opencv:
 
         fig_3D.canvas.draw()
 
+
         # Now we can save it to a numpy array.
         # data = np.fromstring(fig_3D.canvas.tostring_rgb(), dtype=np.uint8, sep='')
         img = np.frombuffer(fig_3D.canvas.tostring_rgb(), dtype=np.uint8)
         img = img.reshape(fig_3D.canvas.get_width_height()[::-1] + (3,))
         img = cv2.resize(img, (output_width, output_height))
         img_BRG = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        #cv2.imshow("Test", img_BRG)
+        #cv2.waitKey()
         video_writer.write(img_BRG)
     video_writer.release()
     cv2.destroyAllWindows()
@@ -118,9 +136,9 @@ else:
             x_col = data[frame,i]
             y_col = data[frame,i+1]
             z_col = data[frame,i+2]
-            print("x_col =", x_col)
-            print("y_col =", y_col)
-            print("z_col =", z_col)
+            #print("x_col =", x_col)
+            #print("y_col =", y_col)
+            #print("z_col =", z_col)
             ax_3D.scatter(x_col, y_col, z_col, c=colors[i % len(colors)])
             # fig_3D.canvas.draw()
             plt.pause(0.001)
